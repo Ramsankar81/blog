@@ -12,7 +12,7 @@
 	}
 	catch(PDOException $e){
 		$error="Unable to connect to the database".$e->getMessage();
-		include $_SERVER['DOCUMENT_ROOT']."/blog/error.html.php";
+		include $_SERVER['DOCUMENT_ROOT']."/error.html.php";
 		exit();
 	}
 	try{
@@ -21,7 +21,8 @@
 				postTitle VARCHAR(255),
 				postDesc TEXT,
 				postCont TEXT,
-				postDate DATETIME
+				postDate DATETIME,
+				authorid INT(11) NOT NULL DEFAULT 1
 			)DEFAULT CHARACTER SET UTF8 ENGINE=InnoDB';
 		$db->exec($sql);
 	}
@@ -44,7 +45,7 @@
 	}catch(PDOException $e){}
 	function __autoload($class){
 		$class=strtolower($class);
-		$classpath = $_SERVER['DOCUMENT_ROOT'].'/blog/classes/class.'.$class.'.php';
+		$classpath = $_SERVER['DOCUMENT_ROOT'].'/classes/class.'.$class.'.php';
 		if(file_exists($classpath)){
 			require_once $classpath;
 		}

@@ -2,22 +2,6 @@
 require_once('../includes/config.php');
 if(!$user->is_logged_in()){ header('Location: login.php'); }
 ?>
-
-<?php
-try{
-	$result = $db->query("SELECT * FROM categories");
-}catch(PDOException $e){
-	$error = "Error in fetching the list of Categories.";
-	include $_SERVER['DOCUMENT_ROOT'] . '/includes/error.html.php';
-	exit();	
-}
-foreach($result as $row){
-	$categories[]  = array('id'=>$row['categoryID'], 'name'=>$row['categoryName']);
-}
-?>
-
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -86,40 +70,35 @@ foreach($result as $row){
 	if(isset($_POST['submit'])){
 		$postTitle=$_POST['postTitle'];
 		$postCont = $_POST['postCont'];
-		$postDesc = $_POST['postDesc'];
 		if($postTitle ==''){
 			$error[] = 'Please enter the title.';
 		}
-		if($postDesc ==''){
-			$error[] = 'Please enter the Description.';
-		}
-		if($postCont ==''){
-			$error[] = 'Please enter the content.';
-		}
 		
 		
 		
-		if($_FILES['postDescImage']['size'] > 0 && !isset($error)){
-			if (preg_match('/^image\/p?jpeg$/i', $_FILES['postDescImage']['type']))
+		
+		if($_FILES['postDesc']['size'] > 0){
+			if (preg_match('/^image\/p?jpeg$/i', $_FILES['postDesc']['type']))
 			{
 				$ext = '.jpg';
 			}
-			else if (preg_match('/^image\/gif$/i', $_FILES['postDescImage']['type']))
+			else if (preg_match('/^image\/gif$/i', $_FILES['postDesc']['type']))
 			{
 				$ext = '.gif';
 			}
-			else if (preg_match('/^image\/(x-)?png$/i', $_FILES['postDescImage']['type']))
+			else if (preg_match('/^image\/(x-)?png$/i', $_FILES['postDesc']['type']))
 			{
 				$ext = '.png';
 			}
 			else
 			{
-				$ext = '.unknown';$error[] = "Please check the extension of  description image.";
+				$ext = '.unknown';
 			}
-			$filename = time();
-			$fileExt = $ext;
-			$filepath = $_SERVER['DOCUMENT_ROOT'] . '/images/' . $filename. $fileExt;
-			if (!is_uploaded_file($_FILES['postDescImage']['tmp_name']) or !copy($_FILES['postDescImage']['tmp_name'], $filepath))
+// The complete path/filename
+			$filename = time() . $ext;
+			$filepath = $_SERVER['DOCUMENT_ROOT'] . '/images/' . $filename;
+// Copy the file (if it is deemed safe)
+			if (!is_uploaded_file($_FILES['postDesc']['tmp_name']) or !copy($_FILES['postDesc']['tmp_name'], $filepath))
 			{
 				$error = "Could not save file as $filename!";
 				include $_SERVER['DOCUMENT_ROOT'] . '/includes/error.html.php';
@@ -129,42 +108,28 @@ foreach($result as $row){
 		
 		
 		
-
+		
+		
+		
+		
+		
+		if($postCont ==''){
+			$error[] = 'Please enter the content.';
+		}
 		if(!isset($error)){
 			try {
-				$stmt = $db->prepare('INSERT INTO blog_posts (postTitle,postDesc,postCont,postDate,authorID,postDescImage,postDescImageExt) VALUES (:postTitle, :postDesc, :postCont, :postDate, :authorid, :postDescImage, :postDescImageExt)') ;
+				$stmt = $db->prepare('INSERT INTO blog_posts (postTitle,postDesc,postCont,postDate,authorID) VALUES (:postTitle, :postDesc, :postCont, :postDate, :authorid)') ;
 				$stmt->execute(array(
 					':postTitle' => $postTitle,
-					':postDesc' => $postDesc,
+					':postDesc' => $filename,
 					':postCont' => $postCont,
 					':postDate' => date('Y-m-d H:i:s'),
-					':authorid' => $_SESSION['memberID'],
-					':postDescImage'=>$filename,
-					':postDescImageExt'=>$fileExt
+					':authorid' => $_SESSION['memberID']
 				));
+				header('Location: index.php?action=added');
+				exit();
 			} catch(PDOException $e) {
 			    echo $e->getMessage();
-			}
-			$postID = $db->lastInsertId();
-			
-			if(isset($_POST['categories'])){
-				try{
-					$sql = "INSERT INTO post_category SET
-							postID = :postID,
-							categoryID = :categoryID;";
-					$stmt = $db->prepare($sql);
-					foreach($_POST['categories'] as $categoryID){
-						$stmt->bindValue(':postID', $postID);
-						$stmt->bindValue(':categoryID', $categoryID);
-						$stmt->execute();
-					}
-					header('Location: index.php?action=added');
-					exit();
-				}catch(PDOException $e){
-					$error = "Error in inserting Categories in database.";
-					include $_SERVER['DOCUMENT_ROOT'] . '/includes/error.html.php';
-					exit();
-				}
 			}
 		}
 	}
@@ -180,23 +145,11 @@ foreach($result as $row){
 		<p><label>Title</label><br />
 		<input type='text' name='postTitle' value='<?php if(isset($error)){ echo $_POST['postTitle'];}?>'></p>
 
-		<p><label>Description Image</label><br />
-		<input type="file" name='postDescImage'><br></p>
-		
 		<p><label>Description</label><br />
-		<textarea name='postDesc' cols='60' rows='10'><?php if(isset($error)){ echo $_POST['postDesc'];}?></textarea></p>
+		<input type="file" name='postDesc'><br></p>
 
 		<p><label>Content</label><br />
 		<textarea name='postCont' cols='60' rows='10'><?php if(isset($error)){ echo $_POST['postCont'];}?></textarea></p>
-		
-		<p>
-			<label>Categories:</label><br>
-			<?php foreach($categories as $category):?>
-				<p>
-					<label for="category<?php echo $category['id'];?>"><input type="checkbox" name="categories[]" id="category<?php echo $category['id'];?>" value="<?php echo $category['id'];?>"><?php echo $category['name'];?></label>
-				</p>
-			<?php endforeach;?>
-		</p>
 
 		<p><input type='submit' name='submit' value='Submit'></p>
 
