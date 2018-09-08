@@ -22,7 +22,9 @@
 				postDesc TEXT,
 				postCont TEXT,
 				postDate DATETIME,
-				authorid INT(11) NOT NULL DEFAULT 1
+				authorid INT(11) NOT NULL DEFAULT 1,
+				postDescImage text,
+				postDescImageExt tinytext
 			)DEFAULT CHARACTER SET UTF8 ENGINE=InnoDB';
 		$db->exec($sql);
 	}
@@ -37,12 +39,27 @@
 	$db->exec($sql);
 	}catch(PDOException $e){}
 	try{
+		$sql = 'CREATE TABLE categories(
+				categoryID int(11) AUTO_INCREMENT NOT NULL PRIMARY KEY,
+				categoryName text
+			)DEFAULT CHARACTER SET UTF8 ENGINE=InnoDB';
+	$db->exec($sql);
+	}catch(PDOException $e){}
+	try{
+		$sql = 'CREATE TABLE post_category(
+				postID int(11),
+				categoryID int(11)
+			)DEFAULT CHARACTER SET UTF8 ENGINE=InnoDB';
+	$db->exec($sql);
+	}catch(PDOException $e){}
+	try{
 		$sql = 'INSERT INTO blog_members SET
 			username = "admin",
 			password = "$2y$10$7Tld34zK/qzleZ9mDhoa.OVfZIxKasM1hs6ByoH5fyuZydnE4THey",
 			email = "mymail@xyz.com";';
 		$db->exec($sql);
 	}catch(PDOException $e){}
+	
 	function __autoload($class){
 		$class=strtolower($class);
 		$classpath = $_SERVER['DOCUMENT_ROOT'].'/classes/class.'.$class.'.php';
