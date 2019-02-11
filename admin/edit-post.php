@@ -37,8 +37,8 @@ else
 <head>
   <meta charset="utf-8">
   <title>Admin - Edit Post</title>
-  <link rel="stylesheet" href="../style/normalize.css">
-  <link rel="stylesheet" href="../style/main.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <?php include "../includes/linkStyle.html"?>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.0/tinymce.min.js"></script>
   <script>
           tinymce.init({
@@ -88,15 +88,9 @@ else
   </script>
 </head>
 <body>
-
+<?php include('navbar.html.php');?>
 <div id="wrapper">
-
-	<?php include('menu.php');?>
-	<p><a href="./">Blog Admin Index</a></p>
-
 	<h2>Edit Post</h2>
-
-
 	<?php
 	if(isset($_POST['submit'])){
 		$postTitle=$_POST['postTitle'];
@@ -116,7 +110,16 @@ else
 			$error[] = 'Please enter the content.';
 		}
 		
-		
+		try{
+				$stmt = $db->query("SELECT postDescImage,postDescImageExt FROM blog_posts WHERE postID = $postID");
+				$result = $stmt->fetch();
+				$filename = $result[0];
+				$fileExt = $result[1];
+			}catch(PDOException $e){
+				$error = "Error in acessing Images";
+				include $_SERVER['DOCUMENT_ROOT'] . '/includes/error.html.php';
+				exit();
+			}
 		if($_FILES['postDescImage']['size'] > 0 && !isset($error)){
 			if (preg_match('/^image\/p?jpeg$/i', $_FILES['postDescImage']['type']))
 			{
@@ -135,18 +138,9 @@ else
 				$ext = '.unknown';
 				$error[] = "Please check the extension of  description image.";
 			}
-			try{
-				$stmt = $db->query("SELECT postDescImage FROM blog_posts WHERE postID = $postID");
-				$result = $stmt->fetch();
-				$filename = $result[0];
-			}catch(PDOException $e){
-				$error = "Error in acessing Images";
-				include $_SERVER['DOCUMENT_ROOT'] . '/includes/error.html.php';
-				exit();
-			}
 			if(!isset($filename)) $filename = time();
 			$fileExt = $ext;
-			$filepath = $_SERVER['DOCUMENT_ROOT'] . '/images/' . $filename. $fileExt;
+			$filepath = $_SERVER['DOCUMENT_ROOT'] . '/images/' . $filename . '/' . $filename. $fileExt;
 			if (!is_uploaded_file($_FILES['postDescImage']['tmp_name']) or !copy($_FILES['postDescImage']['tmp_name'], $filepath))
 			{
 				$error = "Could not save file as $filename!";
@@ -246,6 +240,7 @@ else
 	</form>
 
 </div>
-
+<?php include "../includes/linkScript.html"?>
+<?php include "footer.html.php"?>
 </body>
 </html>	

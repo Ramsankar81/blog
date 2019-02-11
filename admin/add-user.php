@@ -7,16 +7,12 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 <head>
   <meta charset="utf-8">
   <title>Admin - Add User</title>
-  <link rel="stylesheet" href="../style/normalize.css">
-  <link rel="stylesheet" href="../style/main.css">
+   <link rel="stylesheet" href="../css/main.css">
+  <?php include "../includes/linkStyle.html"?>
 </head>
 <body>
-
+<?php include "navbar.html.php";?>
 <div id="wrapper">
-
-	<?php include('menu.php');?>
-	<p><a href="users.php">User Admin Index</a></p>
-
 	<h2>Add User</h2>
 
 	<?php
@@ -77,5 +73,7 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 		<p><input type='submit' name='submit' value='Add User'></p>
 
 	</form>
-
+	
 </div>
+<?php include "../includes/linkScript.html"?>
+<?php include "footer.html.php"?>

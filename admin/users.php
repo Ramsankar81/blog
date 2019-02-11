@@ -5,7 +5,7 @@ if(isset($_GET['deluser'])){
 	if($_GET['deluser'] !='1'){
 		$stmt = $db->prepare('DELETE FROM blog_members WHERE memberID = :memberID') ;
 		$stmt->execute(array(':memberID' => $_GET['deluser']));
-		header('Location: users.php?action=deleted');
+		header('Location: logout.php');
 		exit;
 	}
 } 
@@ -15,8 +15,8 @@ if(isset($_GET['deluser'])){
 <head>
   <meta charset="utf-8">
   <title>Admin - Users</title>
-  <link rel="stylesheet" href="../style/normalize.css">
-  <link rel="stylesheet" href="../style/main.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <?php include "../includes/linkStyle.html"?>
   <script language="JavaScript" type="text/javascript">
   function deluser(id, title)
   {
@@ -28,18 +28,17 @@ if(isset($_GET['deluser'])){
   </script>
 </head>
 <body>
-
+<?php include "navbar.html.php"?>
 	<div id="wrapper">
-
-	<?php include('menu.php');?>
-
 	<?php 
 	if(isset($_GET['action'])){ 
 		echo '<h3>User '.$_GET['action'].'.</h3>'; 
 	} 
 	?>
-
-	<table>
+	<h1>Users</h1>
+	<hr/>
+	<p><a href='add-user.php' style="color:red;">Add User</a></p>
+	<table  style="font-size:15px;">
 	<tr>
 		<th>Username</th>
 		<th>Email</th>
@@ -54,12 +53,13 @@ if(isset($_GET['deluser'])){
 				echo '<td>'.$row['username'].'</td>';
 				echo '<td>'.$row['email'].'</td>';
 				?>
-
 				<td>
-					<a href="edit-user.php?id=<?php echo $row['memberID'];?>">Edit</a> 
+					<?php if($_SESSION['memberID'] == $row['memberID'] || $_SESSION['memberID'] == 1):?>
+					<a href="edit-user.php?id=<?php echo $row['memberID'];?>" style="color:red;">Edit</a> 
 					<?php if($row['memberID'] != 1){?>
-						| <a href="javascript:deluser('<?php echo $row['memberID'];?>','<?php echo $row['username'];?>')">Delete</a>
+						| <a href="javascript:deluser('<?php echo $row['memberID'];?>','<?php echo $row['username'];?>')" style="color:red;">Delete</a>
 					<?php } ?>
+					<?php endif;?>
 				</td>
 
 				<?php 
@@ -70,10 +70,8 @@ if(isset($_GET['deluser'])){
 		}
 	?>
 	</table>
-
-	<p><a href='add-user.php'>Add User</a></p>
-
 </div>
-
+<?php include "../includes/linkScript.html"?>
+<?php include "footer.html.php"?>
 </body>
 </html>

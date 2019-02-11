@@ -1,1 +1,1 @@
-# blog
+This blog is for learning.

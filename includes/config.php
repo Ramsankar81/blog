@@ -24,7 +24,8 @@
 				postDate DATETIME,
 				authorid INT(11) NOT NULL DEFAULT 1,
 				postDescImage text,
-				postDescImageExt tinytext
+				postDescImageExt tinytext,
+				postViews INT(11) DEFAULT 0 
 			)DEFAULT CHARACTER SET UTF8 ENGINE=InnoDB';
 		$db->exec($sql);
 	}

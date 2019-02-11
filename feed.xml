@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+<channel>
+<title>MyBlog RSS Feed</title>
+<link>http://testrssfeed.000webhostapp.com/</link>
+<description>Cool Websites, Software and Internet Tips</description>
+
+<item>
+<title>Entry Title</title>
+<link>http://testrssfeed.000webhostapp.com/</link>
+<guid>http://testrssfeed.000webhostapp.com/</guid>
+<description>This is the description of the content...</description>
+<pubDate>Wed, July 4 2018</pubDate>
+</item>
+</channel>
+</rss>

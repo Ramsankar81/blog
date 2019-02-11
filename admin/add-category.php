@@ -53,29 +53,33 @@ foreach($result as $row){
 <head>
   <meta charset="utf-8">
   <title>Admin - Post Categories</title>
-  <link rel="stylesheet" href="../style/normalize.css">
-  <link rel="stylesheet" href="../style/main.css">
+ <link rel="stylesheet" href="../css/main.css">
+  <?php include "../includes/linkStyle.html"?>
 </head>
 <body>
+	<?php include "navbar.html.php"?>
 	<div id="wrapper">
-		<?php include('menu.php');?>
-		<br>
+		<h1>Manage Categories</h1>
+		<hr/>
+		<fieldset> <legend>Add Category</legend>
 		<form method="post" action="">
 			<div>
-				<label>Add New Post Category:</label>
+				<label> New Category name:</label>
 				<input type="text" name="newPost">
 			</div>
 			<div>
 				<input type="submit" name="add" value="ADD">
 			</div>
 		</form>
+		</fieldset>
 		<br>
+		<fieldset><legend>Delete Categories</legend>
 		<form method="post" action="">
-			<label>Delete Post Categories:</label><br>
+			<label><b>Select Categories to Delete:<b></label><br>
 			<?php if(!empty($categories)):?>
 			<?php foreach($categories as $category):?>
 				<div>
-					<label for="category<?php echo $category['id'];?>"><input type="checkbox" name="categories[]" id="category<?php echo $category['id'];?>" value="<?php echo $category['id'];?>"><?php echo $category['name'];?></label>
+					<label for="category<?php echo $category['id'];?>"><input type="checkbox" name="categories[]" id="category<?php echo $category['id'];?>" value="<?php echo $category['id'];?>"> <?php echo $category['name'];?> </label>
 				</div>
 			<?php endforeach;?>
 			<?php endif;?>
@@ -84,6 +88,9 @@ foreach($result as $row){
 				<input type="submit" name="delete" value="DELETE">
 			</div>
 		</form>
+		</fieldset>
 	</div>
+	<?php include "../includes/linkScript.html"?>
+	<?php include "footer.html.php"?>
 </body>
 </html>

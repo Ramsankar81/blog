@@ -14,6 +14,22 @@ try{
 foreach($result as $row){
 	$categories[]  = array('id'=>$row['categoryID'], 'name'=>$row['categoryName']);
 }
+if(isset($_GET['suggest'])){
+	try{
+		$postID = $_GET['id'];
+		$result = $db->query("SELECT * FROM suggestions WHERE postID=$postID;");
+	}catch(PDOException $e){
+		$error = "Error in fetching the suggestion.";
+		include $_SERVER['DOCUMENT_ROOT'] . '/includes/error.html.php';
+		exit();	
+	}
+	$post = $result->fetch();
+	$error[]="Don't Forget to add Authors name in Post Content.";
+	$postTitle=$post['postTitle'];
+	$postCont = $post['postCont'].'<br>Special Thanks to '.$post['authorName'].' for Contribution';
+	$postDesc = $post['postDesc'];
+}
+else if(!is_dir("../images/tempAzhar")) mkdir("../images/tempAzhar");
 ?>
 
 
@@ -23,8 +39,8 @@ foreach($result as $row){
 <head>
   <meta charset="utf-8">
   <title>Admin - Add Post</title>
-  <link rel="stylesheet" href="../style/normalize.css">
-  <link rel="stylesheet" href="../style/main.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <?php include "../includes/linkStyle.html"?>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.0/tinymce.min.js"></script>
   <script>
           tinymce.init({
@@ -74,12 +90,8 @@ foreach($result as $row){
   </script>
 </head>
 <body>
-
+<?php include "navbar.html.php"?>
 <div id="wrapper">
-
-	<?php include('menu.php');?>
-	<p><a href="./">Blog Admin Index</a></p>
-
 	<h2>Add Post</h2>
 
 	<?php
@@ -118,19 +130,21 @@ foreach($result as $row){
 			}
 			$filename = time();
 			$fileExt = $ext;
-			$filepath = $_SERVER['DOCUMENT_ROOT'] . '/images/' . $filename. $fileExt;
+			$filepath = $_SERVER['DOCUMENT_ROOT'] . '/images/tempAzhar/' . $filename. $fileExt;
 			if (!is_uploaded_file($_FILES['postDescImage']['tmp_name']) or !copy($_FILES['postDescImage']['tmp_name'], $filepath))
 			{
 				$error = "Could not save file as $filename!";
 				include $_SERVER['DOCUMENT_ROOT'] . '/includes/error.html.php';
 				exit();
 			}
+			rename("../images/tempAzhar","../images/$filename");
 		}
 		
 		
 		
 
 		if(!isset($error)){
+			$postCont = str_replace("/tempAzhar/","/$filename/",$postCont);
 			try {
 				$stmt = $db->prepare('INSERT INTO blog_posts (postTitle,postDesc,postCont,postDate,authorID,postDescImage,postDescImageExt) VALUES (:postTitle, :postDesc, :postCont, :postDate, :authorid, :postDescImage, :postDescImageExt)') ;
 				$stmt->execute(array(
@@ -146,7 +160,6 @@ foreach($result as $row){
 			    echo $e->getMessage();
 			}
 			$postID = $db->lastInsertId();
-			
 			if(isset($_POST['categories'])){
 				try{
 					$sql = "INSERT INTO post_category SET
@@ -178,28 +191,26 @@ foreach($result as $row){
 	<form action='' method='post' enctype="multipart/form-data">
 
 		<p><label>Title</label><br />
-		<input type='text' name='postTitle' value='<?php if(isset($error)){ echo $_POST['postTitle'];}?>'></p>
+		<input type='text' name='postTitle' value='<?php if(isset($error)){ echo $postTitle;}?>'></p>
 
 		<p><label>Description Image</label><br />
 		<input type="file" name='postDescImage'><br></p>
 		
 		<p><label>Description</label><br />
-		<textarea name='postDesc' cols='60' rows='10'><?php if(isset($error)){ echo $_POST['postDesc'];}?></textarea></p>
+		<textarea name='postDesc' cols='60' rows='10'><?php if(isset($error)){ echo $postDesc;}?></textarea></p>
 
 		<p><label>Content</label><br />
-		<textarea name='postCont' cols='60' rows='10'><?php if(isset($error)){ echo $_POST['postCont'];}?></textarea></p>
+		<textarea name='postCont' cols='60' rows='10'><?php if(isset($error)){ echo $postCont;}?></textarea></p>
 		
 		<p>
-			<label>Categories:</label><br>
+			<label>Select Categories:</label><br>
 			<?php foreach($categories as $category):?>
-				<p>
-					<label for="category<?php echo $category['id'];?>"><input type="checkbox" name="categories[]" id="category<?php echo $category['id'];?>" value="<?php echo $category['id'];?>"><?php echo $category['name'];?></label>
-				</p>
+					<label for="category<?php echo $category['id'];?>"><input type="checkbox" name="categories[]" id="category<?php echo $category['id'];?>" value="<?php echo $category['id'];?>"><?php echo $category['name'];?></label><br>
 			<?php endforeach;?>
 		</p>
-
 		<p><input type='submit' name='submit' value='Submit'></p>
-
 	</form>
 
 </div>
+<?php include "../includes/linkScript.html"?>
+<?php include "footer.html.php"?>
